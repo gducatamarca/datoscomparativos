@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CONADU HISTÓRICA · GDU Catamarca · Datos 2026</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Fondo principal: tono ameno, cálido y suave (fácil de modificar si se pide volver al negro) */
+    body {
+      background: #F3EFE6;  /* Color arena/piedra claro, agradable visualmente */
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Contenedor general que agrupa flyers y gráfico */
+    .main-container {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Estilos del título principal (sin la palabra "flyers") */
+    .titulo-principal {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .titulo-principal h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #B5722C, #A05E1A);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+    }
+    .titulo-principal .subtitulo {
+      font-size: 1rem;
+      color: #4A5568;
+      margin-top: 6px;
+      border-top: 1px solid #D4C5B2;
+      display: inline-block;
+      padding-top: 8px;
+      letter-spacing: 1px;
+    }
+
+    /* Descripción debajo del título */
+    .descripcion-datos {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #6F5B3E;
+      background: rgba(255,245,235,0.7);
+      display: inline-block;
+      width: auto;
+      margin: 12px auto 24px;
+      padding: 6px 18px;
+      border-radius: 60px;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Grid / layout de flyers: apilados verticalmente en móvil, centrados */
+    .flyers-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      width: 100%;
+      margin-bottom: 48px;
+    }
+
+    /* Cada flyer (tarjeta SVG) */
+    .flyer {
+      width: 100%;
+      max-width: 580px;
+      transition: transform 0.2s ease, box-shadow 0.2s;
+      border-radius: 20px;
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.25);
+    }
+    .flyer:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 28px 36px -14px rgba(0, 0, 0, 0.35);
+    }
+    .flyer svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 20px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Sección del gráfico comparativo (al final de todo) */
+    .grafico-comparativo {
+      background: rgba(255, 252, 245, 0.92);
+      backdrop-filter: blur(2px);
+      border-radius: 32px;
+      padding: 28px 20px 32px;
+      margin-top: 20px;
+      margin-bottom: 40px;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.2);
+      border: 1px solid #EBD9C4;
+      transition: all 0.2s;
+    }
+    .grafico-titulo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .grafico-titulo h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #2C3E2F;
+      letter-spacing: -0.3px;
+    }
+    .grafico-titulo p {
+      font-size: 0.9rem;
+      color: #7D6B4B;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+    .leyenda {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .leyenda span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: #F9F4EA;
+      padding: 6px 16px;
+      border-radius: 40px;
+    }
+    .color-inflacion {
+      width: 24px;
+      height: 16px;
+      background: #2C5282;
+      border-radius: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .color-aumento {
+      width: 24px;
+      height: 16px;
+      background: #DD6B20;
+      border-radius: 20px;
+    }
+    /* Contenedor con scroll horizontal en móvil para mantener comparación clara */
+    .chart-wrapper {
+      overflow-x: auto;
+      overflow-y: visible;
+      margin-top: 10px;
+      padding-bottom: 12px;
+      width: 100%;
+    }
+    .chart-bars {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      min-width: 650px;
+      gap: 20px;
+      padding: 0 8px;
+    }
+    .mes-card {
+      flex: 1;
+      text-align: center;
+      min-width: 90px;
+      background: rgba(245, 240, 230, 0.5);
+      border-radius: 28px;
+      padding: 12px 8px 16px;
+      transition: all 0.1s;
+    }
+    .mes-nombre {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #3A2C1F;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #E2CFB5;
+      display: inline-block;
+      padding-bottom: 4px;
+    }
+    .barras-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 20px;
+      align-items: flex-end;
+      margin: 10px 0 12px;
+      height: 180px;
+    }
+    .barra-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 70px;
+    }
+    .barra-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #4B3B28;
+    }
+    .barra {
+      width: 42px;
+      background: #2C5282;
+      border-radius: 12px 12px 6px 6px;
+      transition: height 0.2s;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+      min-height: 4px;
+    }
+    .barra.aumento {
+      background: #DD6B20;
+    }
+    .porcentaje-valor {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-top: 8px;
+      background: #FFF6ED;
+      padding: 2px 8px;
+      border-radius: 24px;
+      color: #2d3748;
+    }
+    .diferencia-mes {
+      font-size: 0.7rem;
+      background: #FCE9DA;
+      border-radius: 40px;
+      padding: 4px 8px;
+      margin-top: 12px;
+      color: #B45309;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    /* Responsive: en móviles, cada flyer ocupa casi todo el ancho, apilados */
+    @media (max-width: 640px) {
+      body {
+        padding: 20px 12px;
+      }
+      .flyer {
+        max-width: 100%;
+      }
+      .titulo-principal h1 {
+        font-size: 1.5rem;
+      }
+      .grafico-comparativo {
+        padding: 20px 12px;
+      }
+      .grafico-titulo h2 {
+        font-size: 1.4rem;
+      }
+      .mes-card {
+        min-width: 85px;
+      }
+      .barra-item {
+        width: 55px;
+      }
+      .barra {
+        width: 34px;
+      }
+    }
+
+    /* Pie de gráfico y fuente */
+    .fuente-grafico {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #8C775A;
+      margin-top: 28px;
+      border-top: 1px solid #E2D2BE;
+      padding-top: 18px;
+      letter-spacing: 0.4px;
+    }
+
+    /* Detalle extra para que todo sea más cálido */
+    .footer-notes {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #aa9a82;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="main-container">
+  <!-- Encabezado principal sin la palabra "flyers" -->
+  <div class="titulo-principal">
+    <h1>CONADU HISTÓRICA · GDU Catamarca · 2026</h1>
+    <div class="subtitulo">Inflación INDEC vs. Aumento Salarial Universitario</div>
+  </div>
+  <div class="descripcion-datos">
+    📊 Pérdida salarial acumulada | Datos oficiales primer semestre
+  </div>
+
+  <!-- LOS FLYERS (uno debajo de otro, responsivos) -->
+  <div class="flyers-grid">
+    <!-- ENERO -->
+    <div class="flyer">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="680" fill="#0D1B2A"/>
+        <rect x="0" y="0" width="680" height="8" fill="#D4A017"/>
+        <text x="340" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#D4A017" letter-spacing="4">CONADU HISTÓRICA · GDU CATAMARCA</text>
+        <text x="340" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#FFFFFF">ENERO</text>
+        <text x="340" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="16" fill="#8FA3B1" letter-spacing="2">2026 · PÉRDIDA SALARIAL</text>
+        <line x1="40" y1="170" x2="640" y2="170" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="195" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">INFLACIÓN INDEC</text>
+        <rect x="100" y="225" width="190" height="270" rx="6" fill="#1E3A5F"/>
+        <text x="195" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#4A90D9">2,9</text>
+        <text x="195" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#4A90D9">%</text>
+        <rect x="100" y="489" width="190" height="6" rx="3" fill="#4A90D9"/>
+        <text x="340" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#D4A017">VS</text>
+        <text x="487" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">AUMENTO DOCENTE</text>
+        <rect x="392" y="225" width="190" height="270" rx="6" fill="#3D1A00"/>
+        <text x="487" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#ED8936">2,5</text>
+        <text x="487" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#ED8936">%</text>
+        <rect x="392" y="489" width="190" height="6" rx="3" fill="#ED8936"/>
+        <rect x="100" y="515" width="480" height="70" rx="8" fill="#1A0505"/>
+        <text x="340" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#FC8181" letter-spacing="1">PÉRDIDA DEL SUELDO</text>
+        <text x="340" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#FC8181">-0,39%</text>
+        <text x="340" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#FC8181" letter-spacing="1" opacity="0.8">en lo que va de 2026</text>
+        <line x1="40" y1="610" x2="640" y2="610" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4A5568" letter-spacing="1">Fuente: INDEC · Datos salariales CONADU HISTÓRICA</text>
+        <rect x="40" y="655" width="170" height="10" rx="2" fill="#1E3A5F"/>
+        <text x="125" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#4A90D9">GDU-CATAMARCA</text>
+        <rect x="470" y="655" width="170" height="10" rx="2" fill="#1E2A3A"/>
+        <text x="555" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#D4A017">CONADU HISTÓRICA</text>
+        <rect x="0" y="672" width="680" height="8" fill="#D4A017"/>
+      </svg>
+    </div>
+
+    <!-- FEBRERO -->
+    <div class="flyer">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="680" fill="#0D1B2A"/>
+        <rect x="0" y="0" width="680" height="8" fill="#D4A017"/>
+        <text x="340" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#D4A017" letter-spacing="4">CONADU HISTÓRICA · GDU CATAMARCA</text>
+        <text x="340" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#FFFFFF">FEBRERO</text>
+        <text x="340" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="16" fill="#8FA3B1" letter-spacing="2">2026 · PÉRDIDA SALARIAL</text>
+        <line x1="40" y1="170" x2="640" y2="170" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="195" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">INFLACIÓN INDEC</text>
+        <rect x="100" y="225" width="190" height="270" rx="6" fill="#1E3A5F"/>
+        <text x="195" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#4A90D9">2,9</text>
+        <text x="195" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#4A90D9">%</text>
+        <rect x="100" y="489" width="190" height="6" rx="3" fill="#4A90D9"/>
+        <text x="340" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#D4A017">VS</text>
+        <text x="487" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">AUMENTO DOCENTE</text>
+        <rect x="392" y="225" width="190" height="270" rx="6" fill="#3D1A00"/>
+        <text x="487" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#ED8936">2,2</text>
+        <text x="487" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#ED8936">%</text>
+        <rect x="392" y="489" width="190" height="6" rx="3" fill="#ED8936"/>
+        <rect x="100" y="515" width="480" height="70" rx="8" fill="#1A0505"/>
+        <text x="340" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#FC8181" letter-spacing="1">PÉRDIDA DEL SUELDO</text>
+        <text x="340" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#FC8181">-1,07%</text>
+        <text x="340" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#FC8181" letter-spacing="1" opacity="0.8">en lo que va de 2026</text>
+        <line x1="40" y1="610" x2="640" y2="610" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4A5568" letter-spacing="1">Fuente: INDEC · Datos salariales CONADU HISTÓRICA</text>
+        <rect x="40" y="655" width="170" height="10" rx="2" fill="#1E3A5F"/>
+        <text x="125" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#4A90D9">GDU-CATAMARCA</text>
+        <rect x="470" y="655" width="170" height="10" rx="2" fill="#1E2A3A"/>
+        <text x="555" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#D4A017">CONADU HISTÓRICA</text>
+        <rect x="0" y="672" width="680" height="8" fill="#D4A017"/>
+      </svg>
+    </div>
+
+    <!-- MARZO -->
+    <div class="flyer">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="680" fill="#0D1B2A"/>
+        <rect x="0" y="0" width="680" height="8" fill="#D4A017"/>
+        <text x="340" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#D4A017" letter-spacing="4">CONADU HISTÓRICA · GDU CATAMARCA</text>
+        <text x="340" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#FFFFFF">MARZO</text>
+        <text x="340" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="16" fill="#8FA3B1" letter-spacing="2">2026 · PÉRDIDA SALARIAL</text>
+        <line x1="40" y1="170" x2="640" y2="170" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="195" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">INFLACIÓN INDEC</text>
+        <rect x="100" y="225" width="190" height="270" rx="6" fill="#1E3A5F"/>
+        <text x="195" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#4A90D9">3,4</text>
+        <text x="195" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#4A90D9">%</text>
+        <rect x="100" y="489" width="190" height="6" rx="3" fill="#4A90D9"/>
+        <text x="340" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#D4A017">VS</text>
+        <text x="487" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">AUMENTO DOCENTE</text>
+        <rect x="392" y="225" width="190" height="270" rx="6" fill="#3D1A00"/>
+        <text x="487" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#ED8936">2,0</text>
+        <text x="487" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#ED8936">%</text>
+        <rect x="392" y="489" width="190" height="6" rx="3" fill="#ED8936"/>
+        <rect x="100" y="515" width="480" height="70" rx="8" fill="#1A0505"/>
+        <text x="340" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#FC8181" letter-spacing="1">PÉRDIDA DEL SUELDO</text>
+        <text x="340" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#FC8181">-2,41%</text>
+        <text x="340" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#FC8181" letter-spacing="1" opacity="0.8">en lo que va de 2026</text>
+        <line x1="40" y1="610" x2="640" y2="610" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4A5568" letter-spacing="1">Fuente: INDEC · Datos salariales CONADU HISTÓRICA</text>
+        <rect x="40" y="655" width="170" height="10" rx="2" fill="#1E3A5F"/>
+        <text x="125" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#4A90D9">GDU-CATAMARCA</text>
+        <rect x="470" y="655" width="170" height="10" rx="2" fill="#1E2A3A"/>
+        <text x="555" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#D4A017">CONADU HISTÓRICA</text>
+        <rect x="0" y="672" width="680" height="8" fill="#D4A017"/>
+      </svg>
+    </div>
+
+    <!-- ABRIL -->
+    <div class="flyer">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="680" fill="#0D1B2A"/>
+        <rect x="0" y="0" width="680" height="8" fill="#D4A017"/>
+        <text x="340" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#D4A017" letter-spacing="4">CONADU HISTÓRICA · GDU CATAMARCA</text>
+        <text x="340" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#FFFFFF">ABRIL</text>
+        <text x="340" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="16" fill="#8FA3B1" letter-spacing="2">2026 · PÉRDIDA SALARIAL</text>
+        <line x1="40" y1="170" x2="640" y2="170" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="195" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">INFLACIÓN INDEC</text>
+        <rect x="100" y="225" width="190" height="270" rx="6" fill="#1E3A5F"/>
+        <text x="195" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#4A90D9">2,6</text>
+        <text x="195" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#4A90D9">%</text>
+        <rect x="100" y="489" width="190" height="6" rx="3" fill="#4A90D9"/>
+        <text x="340" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#D4A017">VS</text>
+        <text x="487" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">AUMENTO DOCENTE</text>
+        <rect x="392" y="225" width="190" height="270" rx="6" fill="#3D1A00"/>
+        <text x="487" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#ED8936">1,7</text>
+        <text x="487" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#ED8936">%</text>
+        <rect x="392" y="489" width="190" height="6" rx="3" fill="#ED8936"/>
+        <rect x="100" y="515" width="480" height="70" rx="8" fill="#1A0505"/>
+        <text x="340" y="535" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#FC8181" letter-spacing="1">PÉRDIDA DEL SUELDO</text>
+        <text x="340" y="558" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="24" fill="#FC8181">-3,26%</text>
+        <text x="340" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#FC8181" letter-spacing="1" opacity="0.8">en lo que va de 2026</text>
+        <line x1="40" y1="610" x2="640" y2="610" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="645" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4A5568" letter-spacing="1">Fuente: INDEC · Datos salariales CONADU HISTÓRICA</text>
+        <rect x="40" y="655" width="170" height="10" rx="2" fill="#1E3A5F"/>
+        <text x="125" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#4A90D9">GDU-CATAMARCA</text>
+        <rect x="470" y="655" width="170" height="10" rx="2" fill="#1E2A3A"/>
+        <text x="555" y="664" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#D4A017">CONADU HISTÓRICA</text>
+        <rect x="0" y="672" width="680" height="8" fill="#D4A017"/>
+      </svg>
+    </div>
+
+    <!-- MAYO + resumen adicional dentro del mismo flayer (ya existe) -->
+    <div class="flyer">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="680" fill="#0D1B2A"/>
+        <rect x="0" y="0" width="680" height="8" fill="#D4A017"/>
+        <text x="340" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#D4A017" letter-spacing="4">CONADU HISTÓRICA · GDU CATAMARCA</text>
+        <text x="340" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="52" fill="#FFFFFF">MAYO</text>
+        <text x="340" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="16" fill="#8FA3B1" letter-spacing="2">2026 · PÉRDIDA SALARIAL</text>
+        <line x1="40" y1="170" x2="640" y2="170" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="195" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">INFLACIÓN INDEC</text>
+        <rect x="100" y="225" width="190" height="270" rx="6" fill="#1E3A5F"/>
+        <text x="195" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#4A90D9">2,1</text>
+        <text x="195" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#4A90D9">%</text>
+        <rect x="100" y="489" width="190" height="6" rx="3" fill="#4A90D9"/>
+        <text x="340" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#D4A017">VS</text>
+        <text x="487" y="215" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8FA3B1" letter-spacing="1">AUMENTO DOCENTE</text>
+        <rect x="392" y="225" width="190" height="270" rx="6" fill="#3D1A00"/>
+        <text x="487" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="80" fill="#ED8936">1,3</text>
+        <text x="487" y="415" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="28" fill="#ED8936">%</text>
+        <rect x="392" y="489" width="190" height="6" rx="3" fill="#ED8936"/>
+        <rect x="100" y="510" width="225" height="70" rx="8" fill="#1A0505"/>
+        <text x="212" y="528" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#FC8181" letter-spacing="1">PÉRDIDA ACUMULADA</text>
+        <text x="212" y="554" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="20" fill="#FC8181">-6,38%</text>
+        <rect x="355" y="510" width="225" height="70" rx="8" fill="#3D0000"/>
+        <text x="467" y="532" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#FEB2B2" letter-spacing="1">PÉRDIDA ESTE MES</text>
+        <text x="467" y="562" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#FEB2B2">-0,80%</text>
+        <line x1="40" y1="608" x2="640" y2="608" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="643" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4A5568" letter-spacing="1">Fuente: INDEC · Datos salariales CONADU HISTÓRICA</text>
+        <rect x="40" y="653" width="170" height="10" rx="2" fill="#1E3A5F"/>
+        <text x="125" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#4A90D9">GDU-CATAMARCA</text>
+        <rect x="470" y="653" width="170" height="10" rx="2" fill="#1E2A3A"/>
+        <text x="555" y="662" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="9" fill="#D4A017">CONADU HISTÓRICA</text>
+        <rect x="0" y="672" width="680" height="8" fill="#D4A017"/>
+      </svg>
+    </div>
+
+    <!-- RESUMEN ENERO A MAYO (flyer ya existente) -->
+    <div class="flyer">
+      <svg viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+        <rect width="680" height="680" fill="#0D1B2A"/>
+        <rect x="0" y="0" width="680" height="8" fill="#D4A017"/>
+        <text x="340" y="68" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="13" fill="#D4A017" letter-spacing="4">CONADU HISTÓRICA · GDU CATAMARCA</text>
+        <text x="340" y="112" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="38" fill="#FFFFFF">ENERO A MAYO</text>
+        <text x="340" y="143" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="16" fill="#8FA3B1" letter-spacing="2">2026 · BALANCE ACUMULADO</text>
+        <line x1="40" y1="163" x2="640" y2="163" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#8FA3B1" letter-spacing="1">DESGLOSE MENSUAL</text>
+        <text x="160" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#8FA3B1">MES</text>
+        <text x="360" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#4A90D9">INFLACIÓN</text>
+        <text x="520" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#ED8936">AUMENTO</text>
+        <line x1="60" y1="232" x2="620" y2="232" stroke="#2D3748" stroke-width="1"/>
+        <rect x="60" y="237" width="560" height="38" rx="4" fill="#0F2136"/><text x="160" y="261" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">Enero</text><text x="360" y="261" text-anchor="middle" fill="#4A90D9" font-size="14" font-weight="700">2,9%</text><text x="520" y="261" text-anchor="middle" fill="#ED8936" font-size="14" font-weight="700">2,5%</text>
+        <rect x="60" y="277" width="560" height="38" rx="4" fill="#0D1B2A"/><text x="160" y="301" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">Febrero</text><text x="360" y="301" text-anchor="middle" fill="#4A90D9" font-size="14" font-weight="700">2,9%</text><text x="520" y="301" text-anchor="middle" fill="#ED8936" font-size="14" font-weight="700">2,2%</text>
+        <rect x="60" y="317" width="560" height="38" rx="4" fill="#0F2136"/><text x="160" y="341" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">Marzo</text><text x="360" y="341" text-anchor="middle" fill="#4A90D9" font-size="14" font-weight="700">3,4%</text><text x="520" y="341" text-anchor="middle" fill="#ED8936" font-size="14" font-weight="700">2,0%</text>
+        <rect x="60" y="357" width="560" height="38" rx="4" fill="#0D1B2A"/><text x="160" y="381" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">Abril</text><text x="360" y="381" text-anchor="middle" fill="#4A90D9" font-size="14" font-weight="700">2,6%</text><text x="520" y="381" text-anchor="middle" fill="#ED8936" font-size="14" font-weight="700">1,7%</text>
+        <rect x="60" y="397" width="560" height="38" rx="4" fill="#0F2136"/><text x="160" y="421" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">Mayo</text><text x="360" y="421" text-anchor="middle" fill="#4A90D9" font-size="14" font-weight="700">2,1%</text><text x="520" y="421" text-anchor="middle" fill="#ED8936" font-size="14" font-weight="700">1,3%</text>
+        <line x1="60" y1="440" x2="620" y2="440" stroke="#D4A017" stroke-width="1" opacity="0.5"/>
+        <text x="160" y="467" text-anchor="middle" fill="#D4A017" font-size="13" font-weight="700" letter-spacing="1">ACUMULADO</text>
+        <rect x="270" y="448" width="150" height="55" rx="6" fill="#1E3A5F"/><text x="345" y="467" fill="#8FA3B1" font-size="10" letter-spacing="1">INFLACIÓN</text><text x="345" y="493" fill="#4A90D9" font-size="28" font-weight="700">14,69%</text>
+        <rect x="440" y="448" width="150" height="55" rx="6" fill="#3D1A00"/><text x="515" y="467" fill="#8FA3B1" font-size="10" letter-spacing="1">AUMENTO</text><text x="515" y="493" fill="#ED8936" font-size="28" font-weight="700">10,08%</text>
+        <rect x="100" y="520" width="480" height="72" rx="8" fill="#1A0505"/><text x="340" y="542" fill="#FC8181" font-size="13" letter-spacing="1">PÉRDIDA DEL SUELDO</text><text x="340" y="570" fill="#FC8181" font-size="26" font-weight="700">-6,38%</text><text x="340" y="585" fill="#FC8181" font-size="10" opacity="0.8">en lo que va de 2026</text>
+        <line x1="40" y1="610" x2="640" y2="610" stroke="#D4A017" stroke-width="0.5" opacity="0.4"/>
+        <text x="340" y="643" fill="#4A5568" font-size="12" letter-spacing="1">Fuente: INDEC · Datos salariales CONADU HISTÓRICA</text>
+        <rect x="40" y="653" width="170" height="10" rx="2" fill="#1E3A5F"/><text x="125" y="662" fill="#4A90D9" font-size="9" font-weight="700">GDU-CATAMARCA</text>
+        <rect x="470" y="653" width="170" height="10" rx="2" fill="#1E2A3A"/><text x="555" y="662" fill="#D4A017" font-size="9" font-weight="700">CONADU HISTÓRICA</text>
+        <rect x="0" y="672" width="680" height="8" fill="#D4A017"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- GRÁFICO COMPARATIVO (AL FINAL DE TODO) -->
+  <div class="grafico-comparativo">
+    <div class="grafico-titulo">
+      <h2>📈 Comparativa mensual: Inflación vs Aumento docente</h2>
+      <p>Enero - Mayo 2026 | Base 100 = valor porcentual mensual</p>
+    </div>
+    <div class="leyenda">
+      <span><i class="color-inflacion"></i> Inflación INDEC</span>
+      <span><i class="color-aumento"></i> Aumento salarial (CONADU)</span>
+    </div>
+    <div class="chart-wrapper">
+      <div class="chart-bars">
+        <!-- Enero -->
+        <div class="mes-card"><div class="mes-nombre">ENERO</div><div class="barras-container"><div class="barra-item"><div class="barra-label">Inflación</div><div class="barra" style="height: 128px; background:#2C5282;"></div><div class="porcentaje-valor">2,9%</div></div><div class="barra-item"><div class="barra-label">Aumento</div><div class="barra aumento" style="height: 110px;"></div><div class="porcentaje-valor">2,5%</div></div></div><div class="diferencia-mes">📉 -0,39%</div></div>
+        <!-- Febrero -->
+        <div class="mes-card"><div class="mes-nombre">FEBRERO</div><div class="barras-container"><div class="barra-item"><div class="barra-label">Inflación</div><div class="barra" style="height: 128px; background:#2C5282;"></div><div class="porcentaje-valor">2,9%</div></div><div class="barra-item"><div class="barra-label">Aumento</div><div class="barra aumento" style="height: 97px;"></div><div class="porcentaje-valor">2,2%</div></div></div><div class="diferencia-mes">📉 -1,07%</div></div>
+        <!-- Marzo -->
+        <div class="mes-card"><div class="mes-nombre">MARZO</div><div class="barras-container"><div class="barra-item"><div class="barra-label">Inflación</div><div class="barra" style="height: 150px; background:#2C5282;"></div><div class="porcentaje-valor">3,4%</div></div><div class="barra-item"><div class="barra-label">Aumento</div><div class="barra aumento" style="height: 88px;"></div><div class="porcentaje-valor">2,0%</div></div></div><div class="diferencia-mes">📉 -2,41%</div></div>
+        <!-- Abril -->
+        <div class="mes-card"><div class="mes-nombre">ABRIL</div><div class="barras-container"><div class="barra-item"><div class="barra-label">Inflación</div><div class="barra" style="height: 115px; background:#2C5282;"></div><div class="porcentaje-valor">2,6%</div></div><div class="barra-item"><div class="barra-label">Aumento</div><div class="barra aumento" style="height: 75px;"></div><div class="porcentaje-valor">1,7%</div></div></div><div class="diferencia-mes">📉 -3,26%</div></div>
+        <!-- Mayo -->
+        <div class="mes-card"><div class="mes-nombre">MAYO</div><div class="barras-container"><div class="barra-item"><div class="barra-label">Inflación</div><div class="barra" style="height: 93px; background:#2C5282;"></div><div class="porcentaje-valor">2,1%</div></div><div class="barra-item"><div class="barra-label">Aumento</div><div class="barra aumento" style="height: 57px;"></div><div class="porcentaje-valor">1,3%</div></div></div><div class="diferencia-mes">📉 -6,38% (acum)</div></div>
+      </div>
+    </div>
+    <div class="fuente-grafico">
+      Fuente: INDEC (IPC) y paritarias CONADU HISTÓRICA · Elaboración propia GDU Catamarca · Datos expresados en porcentaje mensual.
+    </div>
+  </div>
+  <div class="footer-notes">
+    🔍 Cada flyer muestra pérdida mensual y acumulada. Gráfico comparativo refleja la diferencia mes a mes.
+  </div>
+</div>
+</body>
+</html>
